@@ -19,7 +19,9 @@ CONST_NUM_YEARS = 1 # default number of years to look back
 def make_list(file_name=CONST_FNAME):
     """ Reads in a list with a search query for Google Scholar on each line.
     This is intended to read in a list of author names, for authors that
-    are members of our networks of interest.
+    are members of our networks of interest. First column is author names
+
+    TODO: Handle including institutional affiliation for common names?
 
     :param file_name: name of CSV file to open, one author name/query per line,
     first column should be the author's name
@@ -51,14 +53,16 @@ def get_articles_by(author_name="Iris Howley", num_years=CONST_NUM_YEARS):
         pub.fill()
         
         # check to see if article is too old
+        year = -1
         try:
             year = pub.bib['year']
         except KeyError:
             print("-------------------\n")
-            print(pub)
+            print("ERROR no year available for: " +  pub.bib['title'])
+            #print(pub)
             print("-------------------\n")            
             
-        if CONST_YEAR-year <= num_years: # assumes no duplicate titles!
+        if year > 1900 and CONST_YEAR-year <= num_years: # assumes no duplicate titles!
             title = pub.bib['title']
             print("\tAdding: " + author_name + ": " + title + " ("+str(year)+")")
             articles.append(title)
@@ -108,7 +112,7 @@ if __name__=='__main__':
     
     for author in make_list():
         author_pubs[author] = get_articles_by(author) # add pub list to author
-        print("\tReversing: " + author + " --> " +author_pubs[author])
+        print("\tReversing: " + author + " --> " +str(author_pubs[author]))
         for value in author_pubs[author].values:
             # if we haven't seen this title before, add it
             if value not in pub_authors.keys():
@@ -128,7 +132,7 @@ if __name__=='__main__':
                 # if we haven't seen this author pairing, add it
                 if coauthors not in coauth_titles.keys():
                     coauth_titles[coauthors] = []
-                    print("\tAdding new coauthors: " + coauthors)
+                    print("\tAdding new coauthors: " + str(coauthors))
                 # add the pub title to this author pairing
                 coauth_titles[coauthors].append(pub)
     print("DONE constructing auth1,auth2 --> publications")
