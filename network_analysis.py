@@ -1,11 +1,11 @@
-__author__ = 'iris howley'
+__author__ = 'ihowley'
 __project__ = 'networks'
 """
 This module takes in a list of authors (rather, strings) to query
 on Google Scholar, finds all their co-authors, and constructs a
 network file to be visualized as a social network analysis.
 
-(c) 2018 iris howley
+(c) 2018 ihowley
 """
 import scholarly
 import datetime
