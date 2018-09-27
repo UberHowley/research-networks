@@ -151,6 +151,7 @@ if __name__=='__main__':
     #test()
 
     for author in make_list(CONST_FNAME):
+        author_pubs[author] = get_articles_by(author)
         print("\tReversing: " + author + " --> " +str(author_pubs[author]))
         for value in author_pubs[author]:
             # if we haven't seen this title before, add it
