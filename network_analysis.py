@@ -11,11 +11,10 @@ import scholarly
 
 CONST_DELIMITER = "," # for CSV files
 CONST_YEAR = 2018
-articles = [] # titles of publications we've already considered (no double count)
-anonymized = {} # names of authors we're not including in the analysis
+CONST_FNAME = "authors.txt"
 
 
-def makeList(file_name):
+def make_list(file_name=CONST_FNAME):
     """ Reads in a list with a search query for Google Scholar on each line.
     This is intended to read in a list of author names, for authors that
     are members of our networks of interest.
@@ -31,37 +30,33 @@ def makeList(file_name):
         lines.append(all_cols[0].strip()) # assumes first column is author name
     return lines
 
-def get_coauthors(author_name="Iris Howley", num_years=10):
-    """ Given an author's name, find all their co-authors
+def get_articles_by(author_name="Iris Howley", num_years=10):
+    """ Given an author's name, find all their articles
 
     :param author_name: the name of the author of interest
     :param num_years: go back how many years?
-    :return: a list of all the co-authors
+    :return: a list of all the articles by this author
+    
     """
+    articles = [] # all the author's pub titles in given year range
     
     # Retrieve the author's data, fill-in
     search_query = scholarly.search_author(author_name)
     author = next(search_query).fill()
-    #print(author)
-
-    # Print the titles of the author's publications
-    #print([pub.bib['title'] for pub in author.publications])
-
-    # yes, there's a more python way to do this...
+    
+    # Construct a dictionary of author --> publications
     for pub in author.publications:
         pub.fill()
         
-        # check to see if we've already counted this article
-        # and ensure it's not too old
-        title = pub.bib['title']
+        # check to see if article is too old
         year = pub.bib['year']
-        if title not in articles and CONST_YEAR-year <= num_years:
+        if CONST_YEAR-year <= num_years: # assumes no duplicate titles!
+            title = pub.bib['title']
             articles.append(title)
-        
-            coauthors = pub.bib['author'].split(" and ")
-            print(coauthors)
-        
 
+    return articles
+
+        
 def example(author_name="Iris Howley"):
     """
     Example function from the scholarly website.
@@ -82,6 +77,8 @@ def example(author_name="Iris Howley"):
     # Print the titles of the author's publications
     print([pub.bib['title'] for pub in author.publications])
 
+    # authors = pub.bib['author'].split(" and ")
+
     # Take a closer look at the first publication
     pub = author.publications[0].fill()
     print(pub)
@@ -95,4 +92,34 @@ if __name__=='__main__':
     is run as a script (and not as a library or in interactive python)
     """
     #example()
-    get_coauthors()
+    
+    author_pubs = {} # author --> publications
+    pub_authors = {} # publications --> authors
+    coauth_titles = {} # (auth1, auth2) --> [title1, title2, title3...]
+    
+    for author in make_list():
+        author_pubs[author] = get_articles_by(author) # add pub list to author
+        for value in author_pubs[author].values:
+            # if we haven't seen this title before, add it
+            if value not in pub_authors.keys():
+                pub_authors[value] = []
+            pub_authors[value].append(author) # add the author to this pub
+
+    # construct (auth1, auth2) --> [title1, title2, title3...]
+    for pub in pub_authors:
+        author_list = pub_authors[pub]
+        for i in range(0, len(author_list)-1): # TODO -1?
+            auth1 = author_list[i]
+            for j in range(i+1, len(author_list)):
+                auth2 = author_list[j]
+                coauthors = (sorted([auth1, auth2])[0], sorted([auth1, auth2])[1])
+                # if we haven't seen this author pairing, add it
+                if coauthors not in coauth_titles.keys():
+                    coauth_titles[coauthors] = []
+                # add the pub title to this author pairing
+                coauth_titles[coauthors].append(pub)
+
+    # go back through coauth_titles and print author1, author2, num_pubs
+    #TODO
+            
+            
