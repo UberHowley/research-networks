@@ -56,8 +56,6 @@ def get_articles_by(author_name="Iris Howley", num_years=CONST_NUM_YEARS):
         except KeyError:
             print("-------------------\n")
             print(pub)
-            print("-------------------")
-            print(repr(e))
             print("-------------------\n")            
             
         if CONST_YEAR-year <= num_years: # assumes no duplicate titles!
@@ -136,6 +134,7 @@ if __name__=='__main__':
     print("DONE constructing auth1,auth2 --> publications")
     
     # go back through coauth_titles and print author1, author2, num_pubs
-    #TODO
-            
-            
+    o_fname = CONST_FNAME.split(".")[0] + "-coauthors" + ".txt"
+    with open(o_fname, 'w') as f:
+        for auths in coauth_titles:
+            f.write(CONST_DELIMITER.join(auths[0],auths[1],len(coauth_titles[auths])+"\n"))
