@@ -64,6 +64,7 @@ def get_articles_by(author_name="Iris Howley", num_years=CONST_NUM_YEARS):
             
         if year > 1900 and CONST_YEAR-year <= num_years: # assumes no duplicate titles!
             title = pub.bib['title']
+            title = title.replace(CONST_DELIMITER, '') # removing commas
             print("\tAdding: " + author_name + ": " + title + " ("+str(year)+")")
             articles.append(title)
     print("DONE get_articles_by(" + author_name + ")")
@@ -99,21 +100,13 @@ def example(author_name="Iris Howley"):
     # Which papers cited that publication?
     print([citation.bib['title'] for citation in pub.get_citedby()])
 
-if __name__=='__main__':
-    """
-    This is the main function. This is what is called when the file
-    is run as a script (and not as a library or in interactive python)
-    """
-    #example()
+def test():
+    author_pubs["Alpha Beta"] = ["Paper 1", "Paper 2", "Paper 3"]
+    author_pubs["Kappa Delta"] = ["Paper 2", "Paper 5", "Paper 3", "Paper 4"]
     
-    author_pubs = {} # author --> publications
-    pub_authors = {} # publications --> authors
-    coauth_titles = {} # (auth1, auth2) --> [title1, title2, title3...]
-    
-    for author in make_list():
-        author_pubs[author] = get_articles_by(author) # add pub list to author
+    for author in author_pubs:
         print("\tReversing: " + author + " --> " +str(author_pubs[author]))
-        for value in author_pubs[author].values:
+        for value in author_pubs[author]:
             # if we haven't seen this title before, add it
             if value not in pub_authors.keys():
                 pub_authors[value] = []
@@ -141,4 +134,50 @@ if __name__=='__main__':
     o_fname = CONST_FNAME.split(".")[0] + "-coauthors" + ".txt"
     with open(o_fname, 'w') as f:
         for auths in coauth_titles:
-            f.write(CONST_DELIMITER.join(auths[0],auths[1],len(coauth_titles[auths])+"\n"))
+            f.write(CONST_DELIMITER.join([auths[0],auths[1],str(len(coauth_titles[auths]))])+"\n")
+
+
+if __name__=='__main__':
+    """
+    This is the main function. This is what is called when the file
+    is run as a script (and not as a library or in interactive python)
+    """
+    #example()
+    
+    author_pubs = {} # author --> publications
+    pub_authors = {} # publications --> authors
+    coauth_titles = {} # (auth1, auth2) --> [title1, title2, title3...]
+
+    #test()
+
+    for author in author_pubs:
+        print("\tReversing: " + author + " --> " +str(author_pubs[author]))
+        for value in author_pubs[author]:
+            # if we haven't seen this title before, add it
+            if value not in pub_authors.keys():
+                pub_authors[value] = []
+                print("\tAdding new pub: " + value)
+            pub_authors[value].append(author) # add the author to this pub
+    print("DONE constructing publication --> authors")
+
+    # construct (auth1, auth2) --> [title1, title2, title3...]
+    for pub in pub_authors:
+        author_list = pub_authors[pub]
+        for i in range(0, len(author_list)-1): # TODO -1?
+            auth1 = author_list[i]
+            for j in range(i+1, len(author_list)):
+                auth2 = author_list[j]
+                coauthors = (sorted([auth1, auth2])[0], sorted([auth1, auth2])[1])
+                # if we haven't seen this author pairing, add it
+                if coauthors not in coauth_titles.keys():
+                    coauth_titles[coauthors] = []
+                    print("\tAdding new coauthors: " + str(coauthors))
+                # add the pub title to this author pairing
+                coauth_titles[coauthors].append(pub)
+    print("DONE constructing auth1,auth2 --> publications")
+    
+    # go back through coauth_titles and print author1, author2, num_pubs
+    o_fname = CONST_FNAME.split(".")[0] + "-coauthors" + ".txt"
+    with open(o_fname, 'w') as f:
+        for auths in coauth_titles:
+            f.write(CONST_DELIMITER.join([auths[0],auths[1],str(len(coauth_titles[auths]))])+"\n")
