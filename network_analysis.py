@@ -8,10 +8,12 @@ network file to be visualized as a social network analysis.
 (c) 2018 iris howley
 """
 import scholarly
+import datetime
 
 CONST_DELIMITER = "," # for CSV files
-CONST_YEAR = 2018
-CONST_FNAME = "authors.txt"
+CONST_YEAR = datetime.datetime.now().year
+CONST_FNAME = "authors.txt" # filename with author names in first column
+CONST_NUM_YEARS = 1 # default number of years to look back
 
 
 def make_list(file_name=CONST_FNAME):
@@ -30,7 +32,7 @@ def make_list(file_name=CONST_FNAME):
         lines.append(all_cols[0].strip()) # assumes first column is author name
     return lines
 
-def get_articles_by(author_name="Iris Howley", num_years=10):
+def get_articles_by(author_name="Iris Howley", num_years=CONST_NUM_YEARS):
     """ Given an author's name, find all their articles
 
     :param author_name: the name of the author of interest
@@ -49,11 +51,20 @@ def get_articles_by(author_name="Iris Howley", num_years=10):
         pub.fill()
         
         # check to see if article is too old
-        year = pub.bib['year']
+        try:
+            year = pub.bib['year']
+        except KeyError:
+            print("-------------------\n")
+            print(pub)
+            print("-------------------")
+            print(repr(e))
+            print("-------------------\n")            
+            
         if CONST_YEAR-year <= num_years: # assumes no duplicate titles!
             title = pub.bib['title']
+            print("\tAdding: " + author_name + ": " + title + " ("+str(year)+")")
             articles.append(title)
-
+    print("DONE get_articles_by(" + author_name + ")")
     return articles
 
         
@@ -99,11 +110,14 @@ if __name__=='__main__':
     
     for author in make_list():
         author_pubs[author] = get_articles_by(author) # add pub list to author
+        print("\tReversing: " + author + " --> " +author_pubs[author])
         for value in author_pubs[author].values:
             # if we haven't seen this title before, add it
             if value not in pub_authors.keys():
                 pub_authors[value] = []
+                print("\tAdding new pub: " + value)
             pub_authors[value].append(author) # add the author to this pub
+    print("DONE constructing publication --> authors")
 
     # construct (auth1, auth2) --> [title1, title2, title3...]
     for pub in pub_authors:
@@ -116,9 +130,11 @@ if __name__=='__main__':
                 # if we haven't seen this author pairing, add it
                 if coauthors not in coauth_titles.keys():
                     coauth_titles[coauthors] = []
+                    print("\tAdding new coauthors: " + coauthors)
                 # add the pub title to this author pairing
                 coauth_titles[coauthors].append(pub)
-
+    print("DONE constructing auth1,auth2 --> publications")
+    
     # go back through coauth_titles and print author1, author2, num_pubs
     #TODO
             
