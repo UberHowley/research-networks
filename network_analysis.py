@@ -53,6 +53,7 @@ def get_articles_by(author_name="Iris Howley", num_years=CONST_NUM_YEARS):
         pub.fill()
         
         # check to see if article is too old
+        # TODO: what to do with articles that don't have a year?!
         year = -1
         try:
             year = pub.bib['year']
