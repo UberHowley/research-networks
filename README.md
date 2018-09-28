@@ -16,3 +16,4 @@ This last mapping is iterated through one last time, and printed as: author1, au
 ## TODO
 * Check that -1 on the iterating through co-author tuple making
 * Print out to file name,title (repetitive lines) see: [DataScienceCentral](https://www.datasciencecentral.com/profiles/blogs/some-social-network-analysis-with-python)
+* Incorporate a second column, next to author name, for institutional affiliation
