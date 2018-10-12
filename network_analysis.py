@@ -81,7 +81,7 @@ def make_GoogleScholars(author_list):
         if is_GoogleScholar(author):
             google_scholars.append(author)
         else:
-            no_google_scholar.append(",".join(author))
+            no_google_scholar.append(author)
     print("DONE making Google Scholar lists.")            
 
 def print_GoogleScholars(file_name="gs_"+CONST_FNAME.split(".")[0]+".csv"):
@@ -93,13 +93,13 @@ def print_GoogleScholars(file_name="gs_"+CONST_FNAME.split(".")[0]+".csv"):
     global google_scholars
     
     with open(file_name, 'w') as f:
-        f.write("hasGoogleScholar"+CONST_DELIMITER+"Name"+CONST_DELIMITER+"Current Institution")
+        f.write("hasGoogleScholar"+CONST_DELIMITER+"Name"+CONST_DELIMITER+"Current Institution"+"\n")
         
         for author in no_google_scholar:
-            f.write("N"+CONST_DELIMITER.join(author)+"\n")
+            f.write("N"+CONST_DELIMITER+CONST_DELIMITER.join(author)+"\n")
 
         for author in google_scholars:
-            f.write("Y"+CONST_DELIMITER.join(author)+"\n")
+            f.write("Y"+CONST_DELIMITER+CONST_DELIMITER.join(author)+"\n")
     print("DONE outputting Google Scholar Info.")
         
 
